@@ -1,0 +1,8 @@
+# ★ application.yml 은 app 모듈이 소유한다. service-* 에 두지 않는다.
+# 둘 이상의 모듈이 같은 이름으로 classpath 에 올리면 하나만 이기고 나머지는 조용히 무시된다.
+server:
+  port: 8080
+
+spring:
+  application:
+    name: hanumoka-be-monolith
