@@ -1,0 +1,20 @@
+# 개행을 저장소에서 통일한다.
+#
+# ★ 이것이 없으면 Windows 에서 커밋한 gradlew 가 CRLF 로 체크아웃되고
+#   리눅스·맥에서 실행이 안 된다 — "bad interpreter: No such file or directory".
+#   보일러플레이트는 여러 OS 에서 클론되므로 이건 시간문제다.
+
+* text=auto eol=lf
+
+# Windows 에서만 실행되는 것은 CRLF 여야 한다.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# 셸에서 실행되는 것은 반드시 LF 다.
+gradlew text eol=lf
+
+*.jar  binary
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.ico  binary

@@ -34,6 +34,8 @@
 
 ```
 hanumoka-be/
+├── buildSrc/            빌드 규칙 — 관례 플러그인과 층 의존 규칙 검사
+│
 ├── app/                 조립 — 프로세스가 되는 자리
 │   └── app-monolith        main · WAS · 환경 설정. 도메인은 없다
 │
@@ -138,6 +140,31 @@ curl -X POST localhost:8080/smoke/items -H 'Content-Type: application/json' -d '
 
 **JDK 25가 필요합니다.** `jvmToolchain(25)`은 「25 이상」이 아니라 **정확히 25**를 찾습니다 — 26이 설치돼 있어도 대신 쓰지 않습니다.
 
+**설치돼 있지 않아도 Gradle이 받아 옵니다.** `settings.gradle.kts`가 툴체인 다운로드 저장소를 등록해 두었기 때문입니다.
+IDE의 Auto-download 스위치는 「금지하지 않았다」는 뜻일 뿐이고 **어디서 받을지**는 그 등록이 정합니다.
+
+## 빌드 규칙은 어디에 있나
+
+**모듈의 `build.gradle.kts`는 「이 모듈만의 것」만 갖습니다.** 나머지는 `buildSrc/`의 관례 플러그인 셋이 갖습니다.
+
+| 플러그인 | 누가 쓰나 | 주는 것 |
+|---|---|---|
+| `hanumoka.kotlin-base` | 스프링을 모르는 모듈 (`contract/`) | 좌표 · 툴체인 25 · 테스트 러너 · 층 의존 규칙 검사 |
+| `hanumoka.spring-library` | `service-*` · `platform-*` | 위 + 스프링. **Boot 플러그인은 없고 BOM을 직접 가져옵니다** |
+| `hanumoka.spring-app` | `app/*` | 위 + Boot 플러그인. 실행 가능 jar와 ArchUnit |
+
+**플러그인 버전이 적히는 곳은 `buildSrc/build.gradle.kts` 한 곳입니다.** 루트 `build.gradle.kts`는 비어 있습니다.
+
+### 층 의존 규칙을 빌드가 지킵니다
+
+**위의 규칙 다섯은 문서에만 있으면 지켜지지 않습니다.** 검사가 둘 있고 보는 것이 다릅니다.
+
+- **`checkLayerDependencies`** (`buildSrc`) — 모듈이 모듈을 의존하는가. `check`에 붙어 있어 빌드마다 돕니다.
+- **`LayerDependencyTest`** (ArchUnit) — 클래스가 클래스를 참조하는가. **같은 모듈 안에서 패키지를 잘못 쓰면 이것만 잡습니다.**
+
+★ **0단계가 일부러 어기는 것 하나는 예외 목록에 이유와 함께 등록돼 있습니다**(`buildSrc`의 `DELIBERATE_EXCEPTIONS`).
+1단계에서 이벤트로 바꾸면 **그 항목과 `service-order`의 그 의존이 함께 사라집니다** — 그 커밋의 diff가 곧 「경계를 설계했다」의 증거입니다.
+
 ## 기술 스택
 
 | 층 | 무엇 |
@@ -152,4 +179,4 @@ curl -X POST localhost:8080/smoke/items -H 'Content-Type: application/json' -d '
 
 ## 라이선스
 
-미정.
+[MIT](LICENSE).
